@@ -112,6 +112,11 @@ The first workload we provide is called the parameter server which is a distribu
 
 The second workload we provide is the called the image transmission, aiming to simulate the ML inference workloads, which is basically transforming the input images using pytorch. 
 
+For each of the workload, we have two subcases (in total 4 experiments):
+
+- The data is ready in HPC nodes, but not synced to cloud ndoes (too time-consumping to transfer all of them)
+- The data is ready in AWS S3, both HPC and cloud nodes should download from S3
+
 Let's get started!
 
 #### Parameter Server
@@ -161,6 +166,8 @@ Please **ssh into the cloud node**, run `cd ~/share/Ray-Workloads/ml/param-serve
 (cloud node)$ rm -rf dataset_batch
 ```
 
+Then let's test with the scheduler. 
+
 Then open up another ssh terminal into the login node to run our scheduler daemon.
 
 ```
@@ -175,9 +182,11 @@ Run the workload again and see the time.
 (login node)$ python3 param-server.py sched
 ```
 
-**Now we have seen the performance difference when HPC has the local while cloud nodes don't have data, then we can test the case when all the data is in S3.**
+#### Parameter Server with S3
 
-Please first remove the images already existed in the cloud node.
+*Now we have seen the performance difference when HPC has the local while cloud nodes don't have data, then we can test the case when all the data is in S3. We also have two experiments here, with and without scheduler.*
+
+First use the S3 without open up the scheduler. Make sure the dataset transferred in cloud nodes have been deleted like below.
 
 ```
 (cloud node)$ cd ~/share/Ray-Workloads/ml/param-server/
@@ -189,6 +198,23 @@ Then go to your local laptop, restart the Ray cluster with your desired network 
 ```
 (your local laptop)$ python3 setup.py --skip-config-ssh --shutdown
 (your local laptop)$ python3 setup.py --skip-config-ssh --run-sshuttle --run-tc-netem --skip-mirror --run-ray --network-topology network_topology_200m.json
+```
+
+Get into the login node, run the workload and see the time output.
+
+```
+(login node)$ python3 param-server-s3.py manu <bucket_name> dataset_batch
+```
+
+**Remove the dataset downloaded in `dataset_batch_s3` from S3 in both cloud nodes and HPC nodes.**
+
+```
+# cloud nodes
+(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(cloud node)$ rm -rf dataset_batch_s3
+# HPC login node
+(login node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(login node)$ rm -rf dataset_batch_s3
 ```
 
 Get into the login node, run the scheduler daemon.
@@ -256,9 +282,11 @@ Run the workload again and see the time.
 (login node)$ python3 image.py sched
 ```
 
-**Now we have seen the performance difference when HPC has the local while cloud nodes don't have data, then we can test the case when all the data is in S3.**
+#### Image Transformation with S3
 
-Please first remove the images already existed in the cloud node.
+*Now we have seen the performance difference when HPC has the local while cloud nodes don't have data, then we can test the case when all the data is in S3. We also have two experiments here, with and without scheduler.*
+
+First use the S3 without open up the scheduler. Make sure the images transferred in cloud nodes have been deleted like below.
 
 ```
 (cloud node)$ cd ~/share/Ray-Workloads/basics/image_tr/
@@ -270,6 +298,23 @@ Then go to your local laptop, restart the Ray cluster with your desired network 
 ```
 (your local laptop)$ python3 setup.py --skip-config-ssh --shutdown
 (your local laptop)$ python3 setup.py --skip-config-ssh --run-sshuttle --run-tc-netem --skip-mirror --run-ray --network-topology network_topology_200m.json
+```
+
+Get into the login node, run the workload and see the time output.
+
+```
+(login node)$ python3 image_s3.py manu <bucket_name> task_images
+```
+
+**Remove the dataset downloaded in `task_images_s3` from S3 in both cloud nodes and HPC nodes.**
+
+```
+# cloud nodes
+(cloud node)$ cd ~/share/Ray-Workloads/basics/image_tr/
+(cloud node)$ rm -rf task_images_s3
+# HPC login node
+(login node)$ cd ~/share/Ray-Workloads/basics/image_tr/
+(login node)$ rm -rf task_images_s3
 ```
 
 Get into the login node, run the scheduler daemon.
