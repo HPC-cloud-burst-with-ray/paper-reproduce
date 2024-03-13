@@ -71,10 +71,12 @@ Please note that some personal AWS accounts might have a quota limit about the t
 With the EC2 nodes created like above, run the following command to setup every software dependency you need. 
 
 ```
-python3 setup.py --install-all-deps --custom-ray-wheel s3://187213755865-wheelbucket/ray-3.0.0.dev0-cp310-cp310-linux_x86_64.whl 
+python3 setup.py --install-all-deps --custom-ray-wheel https://github.com/HPC-cloud-burst-with-ray/paper-reproduce/raw/main/wheels/ray-3.0.0.dev0-cp310-cp310-linux_x86_64.whl
 ```
 
 In the output you might be able to see some "ERROR" text about python package conflicts, you can just ignore them because these package conflicts was part of Ray issues about using `fastapi` in source code version 2.8.5 and we resolve this by the workaround in [Ray Issue 39722](https://github.com/ray-project/ray/issues/39722). 
+
+(OPTIONAL) We also host the ray wheel asset through S3 (might expire because of cost) `s3://187213755865-wheelbucket/ray-3.0.0.dev0-cp310-cp310-linux_x86_64.whl `, pass it to `--custom-ray-wheel` if you want. 
 
 #### Run Ray
 
