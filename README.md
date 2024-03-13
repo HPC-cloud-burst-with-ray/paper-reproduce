@@ -1,4 +1,4 @@
-# Reproduce Toturial
+# Toturial for Running Experiments
 
 In this tutorial, I will be illustrating how to reproduce the experimental results of our research. In this totorial, I will cover the steps of setting up a test platform using [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), and configure the software dependencies of our system using our setup script in our [cloud infra](https://github.com/HPC-cloud-burst-with-ray/cloud-infra) repo. Then I will go through the steps of 
 
@@ -14,7 +14,7 @@ The test environment is totally inside the AWS. With our simulated framework for
 
 Please follow the [AWS official tutorial](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_auth) to setup `Node.js` and `AWS CLI` environment in your **local computer**. Please make sure that `aws --help` and `npm --help` can work. We recommend using `nvm` to control the `npm` versions. 
 
-You need to make sure you can create a **AWS Access Key** and then run `aws configure --profile <profile_name>` to setup AWS  credential. Run `cat ~/.aws/config` and `cat ~/.aws/credential` to examine your crendential. 
+You need to make sure you can create a **AWS Access Key** and then run `aws configure --profile <profile_name>` to setup AWS  credential. Run `cat ~/.aws/config` and `cat ~/.aws/credentials` to examine your crendential. 
 
 You can also run the command below to verify that you have successfully configured AWS crendential. 
 
@@ -59,14 +59,23 @@ cdk bootstrap
 
 Then you just need to run the two commands below to setup one HPC cluster and one cloud cluster. AWS Elastic File Systems (EFS) are also created and mounted to the `~/share` folder to represent the NFS in typical HPC systems. 
 
+First deploy the simulated HPC cluster (on premise nodes).
+
 ```
 cdk deploy OnPremStack
+```
+
+Then deploy the cloud nodes.
+
+```
 cdk deploy CloudStack
 ```
 
 Please note that some personal AWS accounts might have a quota limit about the total number of vCPUs that can be allocated. We used in total 48 vCPUs in our paper. If you encounter deployment failure about quota, you can either [submit a request to AWS](https://repost.aws/knowledge-center/ec2-on-demand-instance-vcpu-increase) for more resource because of a research (this should be very quick), or you can edit the `cdk-app-config.json` and reduce `XLARGE4` to `XLARGE2`. 
 
 #### Setup Software Dependency
+
+Then let's setup with our script. **We have to make sure python module `boto3` is working under your account the availbility zone you just deployed to. Run `cat ~/.aws/config` and `cat ~/.aws/credentials` to examine your crendential make sure they match with the account and region you wrote into the cdk-app-config.json file.**
 
 With the EC2 nodes created like above, run the following command to setup every software dependency you need. 
 
@@ -140,7 +149,7 @@ Download the dataset by the commands below.
 Then you should randomly pick the part of dataset needed. The images will be in the `dataset_batch`. You can edit batch size and num directories needed in `const.py`. 
 
 ```
-(login node)$ cd ~/share/Ray-Workloads/ml/param-server
+(login node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS
 (login node)$ python3 into_dir.py
 ```
 
@@ -159,10 +168,10 @@ Then we can run the first test **without** our scheduler daemon, you will see th
 (login node)$ python3 param-server.py
 ```
 
-Please **ssh into the cloud node**, run `cd ~/share/Ray-Workloads/ml/param-server/`, check how many images are allocated to the cloud node to process by `ls dataset_batch`. Then we need to **remove those images to run the next round of expriment with our scheduler**. 
+Please **ssh into the cloud node**, run `cd ~/share/Ray-Workloads/ml/param-server-PASS/`, check how many images are allocated to the cloud node to process by `ls dataset_batch`. Then we need to **remove those images to run the next round of expriment with our scheduler**. 
 
 ``` 
-(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (cloud node)$ rm -rf dataset_batch
 ```
 
@@ -178,7 +187,7 @@ Then open up another ssh terminal into the login node to run our scheduler daemo
 Run the workload again and see the time.
 
 ```
-(login node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(login node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (login node)$ python3 param-server.py sched
 ```
 
@@ -189,7 +198,7 @@ Run the workload again and see the time.
 First use the S3 without open up the scheduler. Make sure the dataset transferred in cloud nodes have been deleted like below.
 
 ```
-(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (cloud node)$ rm -rf dataset_batch
 ```
 
@@ -210,10 +219,10 @@ Get into the login node, run the workload and see the time output.
 
 ```
 # cloud nodes
-(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(cloud node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (cloud node)$ rm -rf dataset_batch_s3
 # HPC login node
-(login node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(login node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (login node)$ rm -rf dataset_batch_s3
 ```
 
@@ -227,7 +236,7 @@ Get into the login node, run the scheduler daemon.
 In another login node shell, run the workload using S3, you will see the downloaded images in `dataset_batch_s3`. 
 
 ```
-(login node)$ cd ~/share/Ray-Workloads/ml/param-server/
+(login node)$ cd ~/share/Ray-Workloads/ml/param-server-PASS/
 (login node)$ python3 param-server-s3.py sched <bucket_name> dataset_batch
 ```
 
