@@ -1,9 +1,8 @@
 
-## Note
-This repo contains the detail setup for reproducing our experiment result. For the source code of our system implementation, please go to https://github.com/hyoer0423/ray/tree/protbuf. Additionally, this repo contrains pre-built wheel files of our implementation. If you would like to compile it from source or build the wheel on your own, please go to the source code repo and follows Ray compile instructios [here](https://docs.ray.io/en/latest/ray-contribute/development.html). 
-
-
 # Toturial for Running Experiments
+
+## Notice
+This repo contains the detail setup for reproducing our experiment result. For the source code of our system implementation, please go to https://github.com/HPC-cloud-burst-with-ray/ray/tree/protbuf (originally at https://github.com/hyoer0423/ray/tree/protbuf). Additionally, this repo contrains pre-built wheel files of our implementation. If you would like to compile it from source or build the wheel on your own, please go to the source code repo and follows Ray compile instructios [here](https://docs.ray.io/en/latest/ray-contribute/development.html). 
 
 In this tutorial, I will be illustrating how to reproduce the experimental results of our research. In this totorial, I will cover the steps of setting up a test platform using [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), and configure the software dependencies of our system using our setup script in our [cloud infra](https://github.com/HPC-cloud-burst-with-ray/cloud-infra) repo. Then I will go through the steps of 
 
@@ -90,7 +89,7 @@ python3 setup.py --install-all-deps --custom-ray-wheel https://github.com/HPC-cl
 
 In the output you might be able to see some "ERROR" text about python package conflicts, you can just ignore them because these package conflicts was part of Ray issues about using `fastapi` in source code version 2.8.5 and we resolve this by the workaround in [Ray Issue 39722](https://github.com/ray-project/ray/issues/39722). 
 
-(OPTIONAL) We also host the ray wheel asset through S3 (might expire because of cost) `s3://187213755865-wheelbucket/ray-3.0.0.dev0-cp310-cp310-linux_x86_64.whl `, pass it to `--custom-ray-wheel` if you want. 
+(OPTIONAL) We also host the ray wheel asset through S3 (might not be up-to-date because of continuous improving, the github hosted one is the newest) `s3://187213755865-wheelbucket/ray-3.0.0.dev0-cp310-cp310-linux_x86_64.whl `, pass it to `--custom-ray-wheel` if you want. 
 
 #### Run Ray
 
@@ -130,6 +129,10 @@ For each of the workload, we have two subcases (in total 4 experiments):
 
 - The data is ready in HPC nodes, but not synced to cloud ndoes (too time-consumping to transfer all of them)
 - The data is ready in AWS S3, both HPC and cloud nodes should download from S3
+
+**Also note that the following tutorial will guide you through the manual process of running experiments, but it's more like a taste of what we have done. We haved used scritps that run overnight to collect the data needed for the paper, so if you want to also collect those data, please check out our repo [cloud infra](https://github.com/HPC-cloud-burst-with-ray/cloud-infra/tree/main) and see file `run_script_nfs.sh` and `run_script_s3.sh` for automatic data collection.**
+
+**If you decide to run experiments overnight, the AWS bill might not be low.**
 
 Let's get started!
 
