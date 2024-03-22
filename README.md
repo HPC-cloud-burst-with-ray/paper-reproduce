@@ -1,3 +1,8 @@
+
+## Note
+This repo contains the detail setup for reproducing our experiment result. For the source code of our system implementation, please go to https://github.com/hyoer0423/ray/tree/protbuf. Additionally, this repo contrains pre-built wheel files of our implementation. If you would like to compile it from source or build the wheel on your own, please go to the source code repo and follows Ray compile instructios [here](https://docs.ray.io/en/latest/ray-contribute/development.html). 
+
+
 # Toturial for Running Experiments
 
 In this tutorial, I will be illustrating how to reproduce the experimental results of our research. In this totorial, I will cover the steps of setting up a test platform using [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), and configure the software dependencies of our system using our setup script in our [cloud infra](https://github.com/HPC-cloud-burst-with-ray/cloud-infra) repo. Then I will go through the steps of 
